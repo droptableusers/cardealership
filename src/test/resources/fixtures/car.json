@@ -1,0 +1,20 @@
+{
+	"engineSize": 1598,
+	"fuelType": "Diesel",
+	"registration": "04/2011",
+	"bodyStyle": "Limousine",
+	"fuelEconomy": 4.2,
+	"seats": 5,
+	"interiorColour" : "Anthracite",
+	"interior": "Textile",
+	"doors": 5,
+	"transmission": "Manual, 5 Gears",
+	"emissionClass": 5,
+	"price": 14490,
+	"exteriorColour": "Black Myth, metallic",
+	"model": "A3 SB Ambiente 1,6 TDI DPF",
+	"power": 77,
+	"brand": "Audi",
+	"emissions": 112,
+	"mileage": 69207
+}
