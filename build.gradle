@@ -1,0 +1,35 @@
+apply plugin: 'eclipse'
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'jacoco'
+apply plugin: 'sonar-runner'
+
+version = '1.0'
+sourceCompatibility = 1.8
+mainClassName = "io.interact.cardealership.DealershipApplication"
+ext.dropwizardVersion = '0.8.2'
+
+repositories {
+    mavenCentral()
+}
+
+buildscript {
+  repositories { jcenter() }
+  dependencies {
+    classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.0'
+  }
+}
+
+shadowJar {
+  mergeServiceFiles()
+}
+
+dependencies {
+  compile 'io.dropwizard:dropwizard-core:' + dropwizardVersion 
+  compile 'org.slf4j:slf4j-api:1.7.5'
+  testCompile 'io.dropwizard:dropwizard-testing:' + dropwizardVersion
+  testCompile 'junit:junit:4.+'
+}
+
