@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Car {
 
+	private String id;
 	private String brand;
 	private String model;
 	private int engineSize;

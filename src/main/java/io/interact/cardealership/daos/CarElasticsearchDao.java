@@ -21,11 +21,12 @@ public class CarElasticsearchDao {
 	
 	@SneakyThrows
 	public String create(Car car) {
-		return elasticsearchDao.create(index, type, null, mapper.writeValueAsBytes(car));
+		return elasticsearchDao.create(index, type, car.getId(), mapFromCar(car));
 	}
 	
 	public Car getById(String id) {
-		return mapToCar(elasticsearchDao.fetchById(index, type, id));
+		String json = elasticsearchDao.fetchById(index, type, id);
+		return json == null ? null : mapToCar(json);
 	}
 
 	public List<Car> search(String q, int from, int pageSize) {
@@ -39,5 +40,19 @@ public class CarElasticsearchDao {
 	@SneakyThrows
 	private Car mapToCar(String json) {
 		return mapper.readValue(json, Car.class);
+	}
+
+	@SneakyThrows
+	private byte[] mapFromCar(Car car) {
+		return mapper.writeValueAsBytes(car);
+	}
+
+	public boolean deleteById(String id) {
+		return elasticsearchDao.delete(index, type, id);
+	}
+
+	public void update(Car car) {
+		elasticsearchDao.update(index, type, car.getId(), mapFromCar(car));
+		
 	}
 }

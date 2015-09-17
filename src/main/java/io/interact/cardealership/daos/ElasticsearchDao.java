@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -47,8 +48,7 @@ public class ElasticsearchDao {
 				.setFrom(from)
 				.setSize(pageSize)
 				.addField("_source")
-				.execute()
-				.actionGet();
+				.get();
 		List<String> result = new ArrayList<>(pageSize);
 		for (SearchHit hit : response.getHits()) {
 			result.add(hit.getSourceAsString());
@@ -59,6 +59,19 @@ public class ElasticsearchDao {
 	public String fetchById(String indexName, String type, String id) {
 		GetResponse response = esClient.prepareGet(indexName, type, id).execute().actionGet();
 		return response.getSourceAsString();
+	}
+
+	public boolean delete(String indexName, String type, String id) {
+		DeleteResponse response = esClient.prepareDelete(indexName, type, id).execute().actionGet();
+		return response.isFound();
+	}
+
+	public void update(String index, String type, String id, byte[] json) {
+		try {
+			esClient.prepareUpdate(index, type, id).setDoc(json).get();
+		} catch (Exception e) {
+			log.error("error while updating " + id, e);
+		}
 	}
 
 }
