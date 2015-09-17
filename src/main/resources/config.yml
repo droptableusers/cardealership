@@ -1,3 +1,4 @@
+
 server:
   applicationConnectors:
     - type: http
@@ -5,3 +6,19 @@ server:
   adminConnectors:
     - type: http
       port: 8081
+
+elasticsearch:
+  clusterName: elasticsearch
+  settings:
+    node.name: CarDealership
+    
+index: cardealership
+type: car
+
+logging:
+  level: INFO
+  appenders:
+    - type: console
+      threshold: ALL
+      timeZone: UTC
+      target: stdout
