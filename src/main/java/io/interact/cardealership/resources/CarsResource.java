@@ -2,6 +2,7 @@ package io.interact.cardealership.resources;
 
 import io.interact.cardealership.daos.CarElasticsearchDao;
 import io.interact.cardealership.model.Car;
+import io.interact.cardealership.model.SearchResult;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -41,14 +42,14 @@ public class CarsResource {
 		String id = dao.create(car);
 		return Response.created(
 				UriBuilder.fromResource(CarsResource.class)
-				.path(CarsResource.class, "fetchCarById")
-				.build(id)).build();
+						.path(CarsResource.class, "fetchCarById")
+						.build(id)).build();
 	}
-	
+
 	@POST
 	@Path("/batch")
 	public Response createCars(List<Car> cars) {
-		for (Car car: cars) {
+		for (Car car : cars) {
 			car.setId(createId(car));
 			dao.create(car);
 		}
@@ -65,20 +66,20 @@ public class CarsResource {
 			return Response.ok(car).build();
 		}
 	}
-	
+
 	@GET
-	@Path("/_search")
-	public List<Car> search(
-			@NotNull @QueryParam("q") Optional<String> q, 
-			@DefaultValue("0") @QueryParam("from") int from, 
+	public SearchResult<Car> search(
+			@QueryParam("q") Optional<String> q,
+			@DefaultValue("0") @QueryParam("from") int from,
 			@DefaultValue("10") @QueryParam("pageSize") int pageSize) {
-		return dao.search(buildQuery(q.get()), from, pageSize);
+		String query = q.isPresent() ? buildQuery(q.get()) : null; 
+		return dao.search(query, from, pageSize);
 	}
 
 	private String buildQuery(String query) {
 		return query;
 	}
-	
+
 	@DELETE
 	@Path("/{id}")
 	public Response deleteById(@PathParam("id") @NotNull String id) {
@@ -89,7 +90,7 @@ public class CarsResource {
 			return Response.status(Status.NOT_FOUND).build();
 		}
 	}
-	
+
 	@PUT
 	@Path("/{id}")
 	public Response editById(@PathParam("id") @NotNull String id, Car car) {
@@ -97,10 +98,9 @@ public class CarsResource {
 		dao.update(car);
 		return Response.ok().build();
 	}
-	
+
 	private String createId(Car car) {
 		return UUID.randomUUID().toString();
 	}
-
 
 }

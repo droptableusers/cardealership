@@ -2,6 +2,7 @@ package io.interact.cardealership.daos;
 
 import io.dropwizard.jackson.Jackson;
 import io.interact.cardealership.model.Car;
+import io.interact.cardealership.model.SearchResult;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,12 +30,13 @@ public class CarElasticsearchDao {
 		return json == null ? null : mapToCar(json);
 	}
 
-	public List<Car> search(String q, int from, int pageSize) {
-		List<String> searchResults = elasticsearchDao.search(index, type, from, pageSize, q);
-		return searchResults
+	public SearchResult<Car> search(String q, int from, int pageSize) {
+		SearchResult<String> searchResults = elasticsearchDao.search(index, type, from, pageSize, q);
+		List<Car> carResults = searchResults.getHits()
 			.stream()
 			.map(this::mapToCar)
 			.collect(Collectors.toList());
+		return new SearchResult<Car>(searchResults.getTotalHits(), carResults);
 	}
 	
 	@SneakyThrows

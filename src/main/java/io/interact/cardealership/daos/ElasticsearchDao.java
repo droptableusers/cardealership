@@ -2,6 +2,7 @@ package io.interact.cardealership.daos;
 
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
+import io.interact.cardealership.model.SearchResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,7 @@ public class ElasticsearchDao {
 		return null;
 	}
 
-	public List<String> search(String indexName, String type, int from, int pageSize, String query) {
+	public SearchResult<String> search(String indexName, String type, int from, int pageSize, String query) {
 		QueryBuilder queryBuilder = query == null || query.isEmpty() ? matchAllQuery() : queryStringQuery(query);
 		SearchResponse response = esClient.prepareSearch()
 				.setIndices(indexName)
@@ -53,7 +54,8 @@ public class ElasticsearchDao {
 		for (SearchHit hit : response.getHits()) {
 			result.add(hit.getSourceAsString());
 		}
-		return result;
+		long totalHits = response.getHits().getTotalHits();
+		return new SearchResult<String>(totalHits, result);
 	}
 	
 	public String fetchById(String indexName, String type, String id) {
