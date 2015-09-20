@@ -44,9 +44,9 @@ public class DealershipApplication extends Application<DealershipConfiguration> 
 	private void enableCors(Environment environment) {
 		FilterRegistration.Dynamic corsFilter = environment.servlets().addFilter("CorsFilter", CrossOriginFilter.class);
 		corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), false, environment.getApplicationContext().getContextPath() + "*");
-		corsFilter.setInitParameter(ALLOWED_METHODS_PARAM, "GET,PUT,POST,OPTIONS");
+		corsFilter.setInitParameter(ALLOWED_METHODS_PARAM, "GET,PUT,POST,DELETE,OPTIONS,HEAD");
 		corsFilter.setInitParameter(ALLOWED_ORIGINS_PARAM, "*");
-		corsFilter.setInitParameter(ALLOWED_HEADERS_PARAM, "Origin, Content-Type, Accept");
+		corsFilter.setInitParameter(ALLOWED_HEADERS_PARAM, "*");
 		corsFilter.setInitParameter(ALLOW_CREDENTIALS_PARAM, "true");
 	}
 
