@@ -1,5 +1,6 @@
 package io.interact.cardealership.resources;
 
+import io.dropwizard.auth.Auth;
 import io.interact.cardealership.daos.CarElasticsearchDao;
 import io.interact.cardealership.model.Car;
 import io.interact.cardealership.model.SearchResult;
@@ -37,7 +38,7 @@ public class CarsResource {
 	private final CarElasticsearchDao dao;
 
 	@POST
-	public Response createCar(Car car) throws URISyntaxException {
+	public Response createCar(@Auth String user, Car car) throws URISyntaxException {
 		car.setId(createId(car));
 		String id = dao.create(car);
 		return Response.created(
@@ -48,7 +49,7 @@ public class CarsResource {
 
 	@POST
 	@Path("/batch")
-	public Response createCars(List<Car> cars) {
+	public Response createCars(@Auth String user, List<Car> cars) {
 		for (Car car : cars) {
 			car.setId(createId(car));
 			dao.create(car);
@@ -58,7 +59,7 @@ public class CarsResource {
 
 	@GET
 	@Path("/{id}")
-	public Response fetchCarById(@PathParam("id") @NotNull String id) {
+	public Response fetchCarById(@Auth String user, @PathParam("id") @NotNull String id) {
 		Car car = dao.getById(id);
 		if (car == null) {
 			return Response.status(Status.NOT_FOUND).build();
@@ -69,6 +70,7 @@ public class CarsResource {
 
 	@GET
 	public SearchResult<Car> search(
+			@Auth String user,
 			@QueryParam("q") Optional<String> q,
 			@DefaultValue("0") @QueryParam("from") int from,
 			@DefaultValue("10") @QueryParam("pageSize") int pageSize) {
@@ -82,7 +84,7 @@ public class CarsResource {
 
 	@DELETE
 	@Path("/{id}")
-	public Response deleteById(@PathParam("id") @NotNull String id) {
+	public Response deleteById(@Auth String user, @PathParam("id") @NotNull String id) {
 		boolean success = dao.deleteById(id);
 		if (success) {
 			return Response.ok().build();
@@ -93,7 +95,7 @@ public class CarsResource {
 
 	@PUT
 	@Path("/{id}")
-	public Response editById(@PathParam("id") @NotNull String id, Car car) {
+	public Response editById(@Auth String user, @PathParam("id") @NotNull String id, Car car) {
 		car.setId(id);
 		dao.update(car);
 		return Response.ok().build();

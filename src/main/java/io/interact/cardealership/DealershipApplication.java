@@ -2,6 +2,8 @@ package io.interact.cardealership;
 
 import static org.eclipse.jetty.servlets.CrossOriginFilter.*;
 import io.dropwizard.Application;
+import io.dropwizard.auth.AuthFactory;
+import io.dropwizard.auth.basic.BasicAuthFactory;
 import io.dropwizard.elasticsearch.health.EsClusterHealthCheck;
 import io.dropwizard.elasticsearch.managed.ManagedEsClient;
 import io.dropwizard.setup.Environment;
@@ -35,6 +37,8 @@ public class DealershipApplication extends Application<DealershipConfiguration> 
 				configuration.getType());
 		final CarsResource carResource = CarsResource.builder().dao(carEsDao).build();
 		environment.jersey().register(carResource);
+		environment.jersey().register(AuthFactory.binder(
+				new BasicAuthFactory<String>(new SimpleAuthenticator(), "SECRET STUFF", String.class)));
 	}
 
 	private void enableCors(Environment environment) {
