@@ -1,11 +1,16 @@
 package io.interact.cardealership.daos;
 
+import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import io.dropwizard.jackson.Jackson;
 import io.interact.cardealership.model.Car;
 import io.interact.cardealership.model.SearchResult;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
 
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -31,12 +36,22 @@ public class CarElasticsearchDao {
 	}
 
 	public SearchResult<Car> search(String q, int from, int pageSize) {
-		SearchResult<String> searchResults = elasticsearchDao.search(index, type, from, pageSize, q);
+		QueryBuilder queryBuilder = q == null || q.isEmpty() ? matchAllQuery() : buildQuery(q);
+		SearchResult<String> searchResults = elasticsearchDao.search(
+				index, type, from, pageSize, queryBuilder);
 		List<Car> carResults = searchResults.getHits()
 			.stream()
 			.map(this::mapToCar)
 			.collect(Collectors.toList());
 		return new SearchResult<Car>(searchResults.getTotalHits(), carResults);
+	}
+	
+	private QueryStringQueryBuilder buildQuery(String query) {
+		QueryStringQueryBuilder builder =  queryStringQuery(query);
+		builder.field("brand", 3);
+		builder.field("model", 2);
+		builder.field("_all", 1);
+		return builder;
 	}
 	
 	@SneakyThrows
