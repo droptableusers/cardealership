@@ -6,6 +6,8 @@ import io.dropwizard.auth.AuthFactory;
 import io.dropwizard.auth.basic.BasicAuthFactory;
 import io.dropwizard.elasticsearch.health.EsClusterHealthCheck;
 import io.dropwizard.elasticsearch.managed.ManagedEsClient;
+import io.dropwizard.forms.MultiPartBundle;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.interact.cardealership.daos.CarElasticsearchDao;
 import io.interact.cardealership.daos.ElasticsearchDao;
@@ -20,6 +22,11 @@ import org.eclipse.jetty.servlets.CrossOriginFilter;
 
 public class DealershipApplication extends Application<DealershipConfiguration> {
 
+	@Override
+	public void initialize(Bootstrap<DealershipConfiguration> bootstrap) {
+		bootstrap.addBundle(new MultiPartBundle());
+	}
+	
 	public static void main(String[] args) throws Exception {
 		new DealershipApplication().run(args);
 	}

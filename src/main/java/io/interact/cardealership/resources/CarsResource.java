@@ -5,11 +5,15 @@ import io.interact.cardealership.daos.CarElasticsearchDao;
 import io.interact.cardealership.model.Car;
 import io.interact.cardealership.model.SearchResult;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -24,15 +28,22 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
-import com.google.common.base.Optional;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
+
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Optional;
 
 @Path("/cars")
 @Produces(MediaType.APPLICATION_JSON)
 @AllArgsConstructor
 @Builder
+@Slf4j
 public class CarsResource {
 
 	private final CarElasticsearchDao dao;
@@ -50,11 +61,29 @@ public class CarsResource {
 	@POST
 	@Path("/batch")
 	public Response createCars(@Auth String user, List<Car> cars) {
+		log.info("createCars called with {} cars", cars.size());
 		for (Car car : cars) {
 			car.setId(createId(car));
 			dao.create(car);
 		}
 		return Response.ok().build();
+	}
+	
+	@POST
+	@Path("/batch")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadJson(@Auth String user,
+			@FormDataParam("file") InputStream uploadedInputStream,
+			@FormDataParam("file") FormDataContentDisposition fileDetail) {
+		ObjectMapper mapper = new ObjectMapper();
+		List<Car> cars = Collections.emptyList();
+		try {
+			cars = mapper.readValue(uploadedInputStream, new TypeReference<List<Car>>() {});
+		} catch (IOException e) {
+			log.error("Error while reading uploaded stream.", e);
+			e.printStackTrace();
+		}
+		return createCars(user, cars);
 	}
 
 	@GET
