@@ -12,8 +12,12 @@ elasticsearch:
   settings:
     node.name: CarDealership
     
-index: cardealership
-type: car
+dealershipIndex:
+  index: cardealership
+  type: car
+  numberOfShards: 1
+  numberOfReplicas: 0
+  
 
 logging:
   level: INFO

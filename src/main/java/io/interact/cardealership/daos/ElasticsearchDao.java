@@ -10,11 +10,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHit;
 
@@ -24,6 +27,19 @@ import org.elasticsearch.search.SearchHit;
 public class ElasticsearchDao {
 
 	private final Client esClient;
+	
+	public void createIndex(String index, int numberOfShards, int numberOfReplicas) {
+		Settings settings = ImmutableSettings.settingsBuilder()
+			.put("number_of_shards", numberOfShards)
+			.put("number_of_replicas", numberOfReplicas)
+			.build();
+		CreateIndexRequest createIndexRequest = new CreateIndexRequest(index, settings);
+		esClient.admin().indices().create(createIndexRequest).actionGet();
+	}
+
+	public boolean indexExists(String index) {
+		return esClient.admin().indices().prepareExists(index).execute().actionGet().isExists();
+	}
 
 	public String create(String indexName, String type, String id, byte[] jsonData) {
 		try {

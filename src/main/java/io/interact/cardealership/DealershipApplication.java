@@ -1,6 +1,9 @@
 package io.interact.cardealership;
 
-import static org.eclipse.jetty.servlets.CrossOriginFilter.*;
+import static org.eclipse.jetty.servlets.CrossOriginFilter.ALLOWED_HEADERS_PARAM;
+import static org.eclipse.jetty.servlets.CrossOriginFilter.ALLOWED_METHODS_PARAM;
+import static org.eclipse.jetty.servlets.CrossOriginFilter.ALLOWED_ORIGINS_PARAM;
+import static org.eclipse.jetty.servlets.CrossOriginFilter.ALLOW_CREDENTIALS_PARAM;
 import io.dropwizard.Application;
 import io.dropwizard.auth.AuthFactory;
 import io.dropwizard.auth.basic.BasicAuthFactory;
@@ -18,8 +21,11 @@ import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 
+@Slf4j
 public class DealershipApplication extends Application<DealershipConfiguration> {
 
 	@Override
@@ -40,12 +46,23 @@ public class DealershipApplication extends Application<DealershipConfiguration> 
 		final ElasticsearchDao elasticsearchDao = new ElasticsearchDao(managedClient.getClient());
 		final CarElasticsearchDao carEsDao = new CarElasticsearchDao(
 				elasticsearchDao, 
-				configuration.getIndex(),
-				configuration.getType());
+				configuration.getDealershipIndex().getIndex(),
+				configuration.getDealershipIndex().getType());
 		final CarsResource carResource = CarsResource.builder().dao(carEsDao).build();
 		environment.jersey().register(carResource);
 		environment.jersey().register(AuthFactory.binder(
 				new BasicAuthFactory<String>(new SimpleAuthenticator(), "SECRET STUFF", String.class)));
+		environment.lifecycle().addServerLifecycleListener(
+				server -> createIndexIfNotExists(configuration.getDealershipIndex(), elasticsearchDao));
+	}
+
+	private void createIndexIfNotExists(IndexConfiguration dealershipIndex, ElasticsearchDao dao) {
+		if(!dao.indexExists(dealershipIndex.getIndex())) {
+			log.info("creating index {}", dealershipIndex.getIndex());
+			dao.createIndex(dealershipIndex.getIndex(), 
+					dealershipIndex.getNumberOfShards(), 
+					dealershipIndex.getNumberOfReplicas());
+		}
 	}
 
 	private void enableCors(Environment environment) {

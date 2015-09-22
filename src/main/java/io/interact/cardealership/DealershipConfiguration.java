@@ -9,6 +9,5 @@ import lombok.Setter;
 @Setter
 public class DealershipConfiguration extends Configuration {
 	private EsConfiguration elasticsearch;
-	private String index;
-	private String type;
+	private IndexConfiguration dealershipIndex;
 }
